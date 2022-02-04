@@ -1,0 +1,23 @@
+version: "3.6"
+
+services:
+  mongo:
+    image: mongo:4.4.10
+    container_name: mongo-gratitude-bot
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: node
+      MONGO_INITDB_ROOT_PASSWORD: node
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
+  postgresql:
+    image: postgres:14-alpine3.14
+    container_name: postgres-gratitude-stats
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: password
+
+volumes:
+  mongodb_data_container:
