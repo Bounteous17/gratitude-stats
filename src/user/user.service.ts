@@ -32,8 +32,10 @@ export class UserService {
   }
 
   async createUser(data: Prisma.UserCreateInput): Promise<User> {
-    return this.prisma.user.create({
-      data,
+    return this.prisma.user.upsert({
+      create: data,
+      update: { email: data.email },
+      where: { slack_id: data.slack_id },
     });
   }
 

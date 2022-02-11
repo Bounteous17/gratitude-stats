@@ -27,11 +27,17 @@ describe('AppController', () => {
   describe('user service', () => {
     it('should signup user', async () => {
       const user = await appController.signupUser({
-        name: 'Jest',
+        slack_id: 'xyz',
         email: 'jest@localhost',
+        name: 'Jest',
       });
-      expect(Object.keys(user)).toHaveLength(3);
+      expect(Object.keys(user)).toHaveLength(4);
       expect(user.id).toBeTruthy();
+      expect(user).toMatchObject({
+        slack_id: user.slack_id,
+        email: user.email,
+        name: user.name,
+      });
     });
   });
 });

@@ -16,8 +16,9 @@ export class AppController {
   }
 
   async signupUser(userData: {
-    name?: string;
+    slack_id: string;
     email: string;
+    name?: string;
   }): Promise<UserModel> {
     return this.userService.createUser(userData);
   }
