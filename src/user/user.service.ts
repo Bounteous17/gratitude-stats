@@ -1,10 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, Prisma } from '@prisma/client';
+import { InjectConnection } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @InjectConnection() private connection: Connection,
+  ) {}
+
+  async getBotUsers(): Promise<any> {
+    return this.connection.collection('users').find();
+  }
 
   async user(
     userWhereUniqueInput: Prisma.UserWhereUniqueInput,

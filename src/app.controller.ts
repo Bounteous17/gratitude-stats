@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Put } from '@nestjs/common';
 import { AppService } from './app.service';
 import { UserService } from './user/user.service';
 import { User as UserModel } from '@prisma/client';
@@ -21,5 +21,10 @@ export class AppController {
     name?: string;
   }): Promise<UserModel> {
     return this.userService.createUser(userData);
+  }
+
+  @Put('/migrate')
+  async putMigration(): Promise<void> {
+    // await this.signupUser();
   }
 }

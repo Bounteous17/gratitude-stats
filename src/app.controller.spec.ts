@@ -4,19 +4,28 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { UserService } from './user/user.service';
 import { PrismaService } from './prisma/prisma.service';
+import { MongooseModule } from '@nestjs/mongoose';
 
 describe('AppController', () => {
+  let app: TestingModule;
   let appController: AppController;
 
-  beforeEach(async () => {
-    const app: TestingModule = await Test.createTestingModule({
-      imports: [ConfigModule.forRoot()],
+  beforeAll(async () => {
+    app = await Test.createTestingModule({
+      imports: [
+        ConfigModule.forRoot(),
+        MongooseModule.forRoot(
+          'mongodb://node:node@localhost:27017/kaas-prod?authSource=admin',
+        ),
+      ],
       controllers: [AppController],
       providers: [AppService, UserService, PrismaService],
     }).compile();
 
     appController = app.get<AppController>(AppController);
   });
+
+  afterAll(async () => app.close());
 
   describe('root', () => {
     it('should return basic message', () => {
