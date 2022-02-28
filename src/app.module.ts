@@ -10,7 +10,12 @@ import { UserService } from './user/user.service';
 import { PrismaService } from './prisma/prisma.service';
 
 @Module({
-  imports: [ConfigModule.forRoot(), MongooseModule.forRoot('TODO')],
+  imports: [
+    ConfigModule.forRoot(),
+    MongooseModule.forRoot(
+      'mongodb://node:node@localhost:27017/kaas-prod?authSource=admin',
+    ),
+  ],
   controllers: [AppController],
   providers: [AppService, UserService, PrismaService],
 })

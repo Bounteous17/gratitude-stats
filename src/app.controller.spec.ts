@@ -4,11 +4,13 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { UserService } from './user/user.service';
 import { PrismaService } from './prisma/prisma.service';
-import { MongooseModule } from '@nestjs/mongoose';
+import { InjectConnection, MongooseModule } from '@nestjs/mongoose';
+import { connect, Connection as MongoConnection } from 'mongoose';
 
 describe('AppController', () => {
   let app: TestingModule;
   let appController: AppController;
+  let mongoConnection: MongoConnection;
 
   beforeAll(async () => {
     app = await Test.createTestingModule({
@@ -22,10 +24,27 @@ describe('AppController', () => {
       providers: [AppService, UserService, PrismaService],
     }).compile();
 
+    mongoConnection = (
+      await connect(
+        'mongodb://node:node@localhost:27017/kaas-prod?authSource=admin',
+      )
+    ).connection;
     appController = app.get<AppController>(AppController);
   });
 
-  afterAll(async () => app.close());
+  beforeEach(async () => {
+    await mongoConnection.dropDatabase();
+    await mongoConnection
+      .collection('users')
+      .insertMany([
+        { user: { id: '1' }, name: 'Jest', email: 'jest@localhost.localhost' },
+      ]);
+  });
+
+  afterAll(async () => {
+    await mongoConnection.close();
+    await app.close();
+  });
 
   describe('root', () => {
     it('should return basic message', () => {
@@ -35,18 +54,14 @@ describe('AppController', () => {
 
   describe('user service', () => {
     it('should signup user', async () => {
-      const user = await appController.signupUser({
-        slack_id: 'xyz',
-        email: 'jest@localhost',
-        name: 'Jest',
-      });
-      expect(Object.keys(user)).toHaveLength(4);
-      expect(user.id).toBeTruthy();
-      expect(user).toMatchObject({
-        slack_id: user.slack_id,
-        email: user.email,
-        name: user.name,
-      });
+      await appController.putMigration();
+      // expect(Object.keys(user)).toHaveLength(4);
+      // expect(user.id).toBeTruthy();
+      // expect(user).toMatchObject({
+      //   slack_id: user.slack_id,
+      //   email: user.email,
+      //   name: user.name,
+      // });
     });
   });
 });

@@ -15,16 +15,8 @@ export class AppController {
     return this.appService.getRoot();
   }
 
-  async signupUser(userData: {
-    slack_id: string;
-    email: string;
-    name?: string;
-  }): Promise<UserModel> {
-    return this.userService.createUser(userData);
-  }
-
   @Put('/migrate')
   async putMigration(): Promise<void> {
-    // await this.signupUser();
+    await this.userService.migrateAllUsers();
   }
 }

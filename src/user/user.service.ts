@@ -3,6 +3,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { User, Prisma } from '@prisma/client';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
+import { UserBO } from 'src/@types/user';
 
 @Injectable()
 export class UserService {
@@ -12,7 +13,7 @@ export class UserService {
   ) {}
 
   async getBotUsers(): Promise<any> {
-    return this.connection.collection('users').find();
+    return this.connection.collection('users').find().toArray();
   }
 
   async user(
@@ -40,7 +41,7 @@ export class UserService {
     });
   }
 
-  async createUser(data: Prisma.UserCreateInput): Promise<User> {
+  private async createUser(data: Prisma.UserCreateInput): Promise<User> {
     return this.prisma.user.upsert({
       create: data,
       update: { email: data.email },
@@ -63,5 +64,32 @@ export class UserService {
     return this.prisma.user.delete({
       where,
     });
+  }
+
+  private userMapperBO(user: any): UserBO {
+    return {
+      slackId: user.user.id,
+      email: user.email,
+      name: user.name,
+    };
+  }
+
+  private userMapperDAO(user: UserBO): Prisma.UserCreateInput {
+    return {
+      slack_id: user.slackId,
+      email: user.email,
+      name: user.name,
+    };
+  }
+
+  async migrateAllUsers(): Promise<void> {
+    const users = await this.getBotUsers();
+    const usersBO: UserBO[] = users.map((user) => this.userMapperBO(user));
+    const usersDAO: Prisma.UserCreateInput[] = usersBO.map((user) =>
+      this.userMapperDAO(user),
+    );
+    for (const user of usersDAO) {
+      await this.createUser(user);
+    }
   }
 }
