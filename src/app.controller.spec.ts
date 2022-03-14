@@ -41,6 +41,9 @@ describe('AppController', () => {
         user: { id: '1' },
         real_name: 'Jest',
         email: 'jest@localhost.localhost',
+        image: {
+          image_original: 'https://localhost/slack/images/jest.jpg',
+        },
       },
     ]);
   });
@@ -62,12 +65,13 @@ describe('AppController', () => {
       const users = await prismaService.user.findMany();
       expect(users).toHaveLength(1);
       const [user] = users;
-      expect(Object.keys(user)).toHaveLength(4);
+      expect(Object.keys(user)).toHaveLength(5);
       expect(user.id).toBeTruthy();
       expect(user).toMatchObject({
         slack_id: '1',
         email: 'jest@localhost.localhost',
         name: 'Jest',
+        avatar: 'https://localhost/slack/images/jest.jpg',
       });
     });
   });

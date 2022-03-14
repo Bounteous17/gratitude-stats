@@ -14,5 +14,6 @@ model User {
   id        Int       @id @default(autoincrement())
   slack_id  String    @unique
   email     String    @unique
+  avatar    String    @db.Text()
   name      String?
 }

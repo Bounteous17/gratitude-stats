@@ -71,6 +71,9 @@ export class UserService {
       slackId: userDAO.user.id,
       email: userDAO.email,
       realName: userDAO.real_name,
+      image: {
+        imageOriginal: userDAO.image.image_original,
+      },
     };
   }
 
@@ -79,6 +82,7 @@ export class UserService {
       slack_id: user.slackId,
       email: user.email,
       name: user.realName,
+      avatar: user.image.imageOriginal,
     };
   }
 
