@@ -66,11 +66,11 @@ export class UserService {
     });
   }
 
-  private userMapperBO(user: any): UserBO {
+  private userMapperBO(userDAO: any): UserBO {
     return {
-      slackId: user.user.id,
-      email: user.email,
-      name: user.name,
+      slackId: userDAO.user.id,
+      email: userDAO.email,
+      realName: userDAO.real_name,
     };
   }
 
@@ -78,17 +78,19 @@ export class UserService {
     return {
       slack_id: user.slackId,
       email: user.email,
-      name: user.name,
+      name: user.realName,
     };
   }
 
   async migrateAllUsers(): Promise<void> {
-    const users = await this.getBotUsers();
-    const usersBO: UserBO[] = users.map((user) => this.userMapperBO(user));
-    const usersDAO: Prisma.UserCreateInput[] = usersBO.map((user) =>
+    const usersMongoDAO: any[] = await this.getBotUsers();
+    const usersBO: UserBO[] = usersMongoDAO.map((user) =>
+      this.userMapperBO(user),
+    );
+    const usersSqlDAO: Prisma.UserCreateInput[] = usersBO.map((user) =>
       this.userMapperDAO(user),
     );
-    for (const user of usersDAO) {
+    for (const user of usersSqlDAO) {
       await this.createUser(user);
     }
   }

@@ -10,6 +10,7 @@ import { connect, Connection as MongoConnection } from 'mongoose';
 describe('AppController', () => {
   let app: TestingModule;
   let appController: AppController;
+  let prismaService: PrismaService;
   let mongoConnection: MongoConnection;
 
   beforeAll(async () => {
@@ -29,15 +30,19 @@ describe('AppController', () => {
     mongoConnection = (await connect(constants.mongoConnectionString))
       .connection;
     appController = app.get<AppController>(AppController);
+    prismaService = app.get<PrismaService>(PrismaService);
   });
 
   beforeEach(async () => {
+    await prismaService.user.deleteMany();
     await mongoConnection.dropDatabase();
-    await mongoConnection
-      .collection('users')
-      .insertMany([
-        { user: { id: '1' }, name: 'Jest', email: 'jest@localhost.localhost' },
-      ]);
+    await mongoConnection.collection('users').insertMany([
+      {
+        user: { id: '1' },
+        real_name: 'Jest',
+        email: 'jest@localhost.localhost',
+      },
+    ]);
   });
 
   afterAll(async () => {
@@ -54,13 +59,16 @@ describe('AppController', () => {
   describe('user service', () => {
     it('should signup user', async () => {
       await appController.putMigration();
-      // expect(Object.keys(user)).toHaveLength(4);
-      // expect(user.id).toBeTruthy();
-      // expect(user).toMatchObject({
-      //   slack_id: user.slack_id,
-      //   email: user.email,
-      //   name: user.name,
-      // });
+      const users = await prismaService.user.findMany();
+      expect(users).toHaveLength(1);
+      const [user] = users;
+      expect(Object.keys(user)).toHaveLength(4);
+      expect(user.id).toBeTruthy();
+      expect(user).toMatchObject({
+        slack_id: '1',
+        email: 'jest@localhost.localhost',
+        name: 'Jest',
+      });
     });
   });
 });
