@@ -13,22 +13,21 @@ describe('AppController', () => {
   let mongoConnection: MongoConnection;
 
   beforeAll(async () => {
+    const constants = {
+      mongoConnectionString:
+        'mongodb://node:node@localhost:27017/kaas-prod?authSource=admin',
+    };
     app = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot(),
-        MongooseModule.forRoot(
-          'mongodb://node:node@localhost:27017/kaas-prod?authSource=admin',
-        ),
+        MongooseModule.forRoot(constants.mongoConnectionString),
       ],
       controllers: [AppController],
       providers: [AppService, UserService, PrismaService],
     }).compile();
 
-    mongoConnection = (
-      await connect(
-        'mongodb://node:node@localhost:27017/kaas-prod?authSource=admin',
-      )
-    ).connection;
+    mongoConnection = (await connect(constants.mongoConnectionString))
+      .connection;
     appController = app.get<AppController>(AppController);
   });
 
